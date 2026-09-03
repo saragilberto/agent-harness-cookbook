@@ -1,0 +1,23 @@
+[
+  {
+    "id": "R01-codigo-novo-conforme",
+    "descricao": "Model novo estendendo TenantModel e cache com prefixo de tenant. Nada deve ser reportado, apesar da violação legada existente no baseline.",
+    "baseline": "fixtures/baseline",
+    "candidate": "fixtures/candidate-clean",
+    "expectViolations": []
+  },
+  {
+    "id": "R02-model-sem-isolamento",
+    "descricao": "Model novo estendendo Model e chave de cache sem prefixo. Duas violações introduzidas.",
+    "baseline": "fixtures/baseline",
+    "candidate": "fixtures/candidate-violation",
+    "expectViolations": ["A01", "A04"]
+  },
+  {
+    "id": "R03-ruido-historico-nao-conta",
+    "descricao": "Baseline comparado consigo mesmo. Serve de canário: se este caso falhar, a impressão digital do achado está instável e todos os outros viram ruído.",
+    "baseline": "fixtures/baseline",
+    "candidate": "fixtures/baseline",
+    "expectViolations": []
+  }
+]
