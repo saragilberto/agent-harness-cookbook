@@ -1,15 +1,16 @@
 # harness-exemplos
 
-Código que acompanha os artigos sobre governança de código gerado por agente.
+Code accompanying the articles on governance of agent-generated code.
 
-Cada diretório em `exemplos/` corresponde a um artigo e contém a versão executável
-do que o texto descreve. Nada aqui é pseudocódigo: se está no repositório, roda.
+Each directory in `exemplos/` corresponds to an article and contains the
+executable version of what the text describes. Nothing here is pseudocode: if
+it's in the repository, it runs.
 
-## Como usar
+## How to use
 
-Cada exemplo é autocontido. Entre no diretório, leia o `README.md` e siga o
-bloco "Como rodar". Nenhum exemplo tem dependência externa — tudo usa Node 20+
-e a biblioteca padrão.
+Each example is self-contained. Enter the directory, read the `README.md`,
+and follow the "How to run" block. No example has an external dependency —
+everything uses Node 20+ and the standard library.
 
 ```bash
 git clone <url>
@@ -17,28 +18,28 @@ cd harness-exemplos/exemplos/gate-shell
 node --test
 ```
 
-## Exemplos
+## Examples
 
-| Diretório | Artigo | O que demonstra |
+| Directory | Article | What it demonstrates |
 |---|---|---|
-| [`gate-shell`](exemplos/gate-shell) | Hook de PreToolUse como gate de shell | Bloqueio de comandos destrutivos antes da execução, com suíte de testes própria |
-| [`grader-deterministico`](exemplos/grader-deterministico) | Grader determinístico versus LLM como juiz | Scanner de violação arquitetural com comparação por delta |
+| [`gate-shell`](exemplos/gate-shell) | PreToolUse hook as a shell gate | Blocking destructive commands before execution, with its own test suite |
+| [`grader-deterministico`](exemplos/grader-deterministico) | Deterministic grader versus LLM-as-judge | Architectural violation scanner with delta comparison |
 
-## Domínio dos exemplos
+## Example domain
 
-Todos os exemplos usam o mesmo domínio fictício: **Acme Faturas**, uma plataforma
-multi-tenant de faturamento com isolamento por schema no Postgres. É um domínio
-inventado, escolhido por ser simples o bastante para não atrapalhar e realista o
-bastante para as regras fazerem sentido.
+All examples use the same fictional domain: **Acme Invoices**, a multi-tenant
+billing platform with schema-based isolation in Postgres. It's a made-up
+domain, chosen for being simple enough to stay out of the way and realistic
+enough for the rules to make sense.
 
-Manter o mesmo domínio entre artigos deixa o contexto acumular: quem leu o
-terceiro artigo já sabe o que é um tenant aqui.
+Keeping the same domain across articles lets context accumulate: anyone who
+read the third article already knows what a tenant means here.
 
-## Convenções
+## Conventions
 
-Ver [`CONVENCOES.md`](CONVENCOES.md) — estrutura de diretório, formato do README
-de cada exemplo e regras de nomenclatura.
+See [`CONVENTIONS.md`](CONVENTIONS.md) — directory structure, each example's
+README format, and naming rules.
 
-## Licença
+## License
 
-MIT. Use, copie, adapte e leve para dentro da sua empresa sem pedir nada.
+MIT. Use, copy, adapt, and bring it into your company without asking anything.

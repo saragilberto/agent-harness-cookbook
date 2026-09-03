@@ -1,78 +1,79 @@
 #!/usr/bin/env node
 /**
- * Hook de PreToolUse: avalia comandos de shell antes da execução.
+ * PreToolUse hook: evaluates shell commands before execution.
  *
- * Contrato com o Claude Code:
- *   - recebe JSON no stdin com { tool_name, tool_input }
- *   - sai com código 0 para liberar
- *   - sai com código 2 e mensagem no stderr para bloquear;
- *     a mensagem volta para o agente, então ela precisa dizer o que fazer
- *     em vez de só dizer "não".
+ * Contract with Claude Code:
+ *   - receives JSON on stdin with { tool_name, tool_input }
+ *   - exits with code 0 to allow
+ *   - exits with code 2 and a message on stderr to block;
+ *     the message goes back to the agent, so it needs to say what to do
+ *     instead of just saying "no".
  *
- * A lógica de decisão está isolada em evaluate() de propósito: é o que
- * permite testar o gate sem simular o runtime do agente.
+ * The decision logic is isolated in evaluate() on purpose: that's what lets
+ * the gate be tested without simulating the agent's runtime.
  */
 
 /**
- * Cada regra é uma tese sobre o que nunca deve acontecer sem humano no meio.
- * `hint` é o que o agente lê — vale mais que `reason`, porque é o que
- * determina se ele tenta de novo do jeito certo ou fica preso.
+ * Each rule is a thesis about what should never happen without a human in
+ * the loop. `hint` is what the agent reads — it matters more than `reason`,
+ * because it determines whether the agent retries the right way or gets
+ * stuck.
  */
 export const RULES = [
   {
     id: "SH001",
     pattern: /\brm\s+(-[a-zA-Z]*[rf][a-zA-Z]*\s+)+(\/|~|\$HOME)(\s|$)/,
-    reason: "remoção recursiva a partir da raiz ou do home",
-    hint: "Apague caminhos relativos dentro do diretório do projeto.",
+    reason: "recursive removal starting from root or home",
+    hint: "Delete relative paths inside the project directory.",
   },
   {
     id: "SH002",
     pattern: /\bgit\s+push\b[^\n]*\s(--force|-f)\b/,
-    reason: "push forçado",
-    hint: "Use --force-with-lease, ou abra um PR em vez de reescrever a branch.",
+    reason: "force push",
+    hint: "Use --force-with-lease, or open a PR instead of rewriting the branch.",
   },
   {
     id: "SH003",
     pattern: /\bgit\s+(commit|push)\b[^\n]*\b(main|master)\b/,
-    reason: "escrita direta na branch principal",
-    hint: "Crie uma branch e abra PR. A principal é protegida por política.",
+    reason: "direct write to the main branch",
+    hint: "Create a branch and open a PR. The main branch is protected by policy.",
   },
   {
     id: "SH004",
     pattern: /\b(curl|wget)\b[^\n]*\|\s*(sudo\s+)?(ba)?sh\b/,
-    reason: "execução de script remoto direto no shell",
-    hint: "Baixe o script, deixe visível no diff, e execute em outro passo.",
+    reason: "remote script executed directly in the shell",
+    hint: "Download the script, keep it visible in the diff, and run it in a separate step.",
   },
   {
     id: "SH005",
     pattern: /\b(DROP\s+(TABLE|SCHEMA|DATABASE)|TRUNCATE\s+TABLE)\b/i,
-    reason: "DDL destrutivo",
-    hint: "Escreva uma migration. DDL fora de migration não tem rollback.",
+    reason: "destructive DDL",
+    hint: "Write a migration. DDL outside a migration has no rollback.",
   },
   {
     id: "SH006",
     pattern: /\bchmod\s+(-[a-zA-Z]+\s+)*777\b/,
-    reason: "permissão 777",
-    hint: "Use 755 para diretório e 644 para arquivo.",
+    reason: "777 permission",
+    hint: "Use 755 for directories and 644 for files.",
   },
   {
     id: "SH007",
     pattern: />>?\s*\.?[\w./-]*\.env(\.[\w-]+)?(\s|$)/,
-    reason: "escrita em arquivo de ambiente",
-    hint: "Edite .env.example. O .env real é responsabilidade de quem opera.",
+    reason: "write to an environment file",
+    hint: "Edit .env.example. The real .env is the operator's responsibility.",
   },
 ];
 
 /**
- * Comandos que casariam com uma regra mas são seguros por contexto.
- * Toda allowlist é dívida: cada entrada aqui é um buraco no gate, então
- * ela precisa ser específica e ter motivo escrito.
+ * Commands that would match a rule but are safe given context.
+ * Every allowlist is debt: each entry here is a hole in the gate, so it
+ * needs to be specific and have a written reason.
  */
 export const ALLOWLIST = [
   {
     id: "ALLOW001",
     pattern: /^git\s+log\b/,
-    reason: "leitura de histórico nunca escreve",
+    reason: "reading history never writes",
   },
 ];
 
@@ -93,9 +94,9 @@ export function evaluate(command) {
     }
   }
 
-  // Um comando pode encadear vários com && ou ;. Avaliar a linha inteira
-  // como um bloco só é o erro clássico: `ls && rm -rf /` passa se o gate
-  // olhar apenas o primeiro verbo.
+  // A command can chain several with && or ;. Evaluating the whole line
+  // as a single block is the classic mistake: `ls && rm -rf /` passes if
+  // the gate only looks at the first verb.
   for (const rule of RULES) {
     if (rule.pattern.test(normalized)) {
       return {
@@ -111,7 +112,7 @@ export function evaluate(command) {
 }
 
 export function formatDenial(result) {
-  return `[${result.ruleId}] Comando bloqueado: ${result.reason}.\n${result.hint}`;
+  return `[${result.ruleId}] Command blocked: ${result.reason}.\n${result.hint}`;
 }
 
 async function readStdin() {
@@ -125,11 +126,11 @@ async function main() {
   try {
     payload = JSON.parse(await readStdin());
   } catch {
-    // Falha ao entender a entrada libera em vez de bloquear.
-    // Gate que quebra fechado trava o agente por bug próprio; gate que
-    // quebra aberto perde uma checagem. O segundo custa menos, desde que
-    // a falha seja visível.
-    process.stderr.write("gate-shell: entrada inválida, liberando\n");
+    // Failing to parse the input allows instead of blocking.
+    // A gate that fails closed locks up the agent over its own bug; a gate
+    // that fails open loses one check. The second costs less, as long as
+    // the failure is visible.
+    process.stderr.write("gate-shell: invalid input, allowing\n");
     process.exit(0);
   }
 

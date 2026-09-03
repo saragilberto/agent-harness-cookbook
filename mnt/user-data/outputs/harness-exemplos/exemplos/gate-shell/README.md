@@ -1,62 +1,67 @@
-# Hook de PreToolUse como gate de shell
+# PreToolUse hook as a shell gate
 
-Artigo: <url>
+Article: <url>
 
-## O problema
+## The problem
 
-Regra escrita em `CLAUDE.md` é sugestão: o agente lê, concorda e às vezes faz
-diferente. Enquanto a proibição existe só como texto no contexto, ela depende
-de o modelo lembrar dela no momento certo, com o contexto cheio, no meio de uma
-tarefa longa. O que transforma política em garantia é um hook que roda antes da
-execução e não depende de ninguém lembrar de nada.
+A rule written in `CLAUDE.md` is a suggestion: the agent reads it, agrees,
+and sometimes does something different. As long as the prohibition exists
+only as text in the context, it depends on the model remembering it at the
+right moment, with a full context, in the middle of a long task. What turns
+policy into a guarantee is a hook that runs before execution and doesn't
+depend on anyone remembering anything.
 
-## Como rodar
+## How to run
 
 ```bash
 cd exemplos/gate-shell
 node --test
 ```
 
-Exercitando o hook direto, como o agente faz:
+Exercising the hook directly, the way the agent does:
 
 ```bash
 echo '{"tool_name":"Bash","tool_input":{"command":"git push --force origin main"}}' \
   | node gate-shell.mjs; echo "exit=$?"
-# [SH002] Comando bloqueado: push forçado.
-# Use --force-with-lease, ou abra um PR em vez de reescrever a branch.
+# [SH002] Command blocked: force push.
+# Use --force-with-lease, or open a PR instead of rewriting the branch.
 # exit=2
 ```
 
-Para instalar no seu projeto, registre em `.claude/settings.json` como hook de
-`PreToolUse` no matcher `Bash`.
+To install it in your project, register it in `.claude/settings.json` as a
+`PreToolUse` hook on the `Bash` matcher.
 
-## O que olhar primeiro
+## What to look at first
 
-`gate-shell.mjs`, função `evaluate()`. É onde a decisão acontece, e é pura de
-propósito: recebe string, devolve decisão. Todo o resto do arquivo é encanamento
-de stdin e código de saída.
+`gate-shell.mjs`, the `evaluate()` function. That's where the decision
+happens, and it's pure on purpose: it takes a string, returns a decision.
+Everything else in the file is stdin plumbing and exit codes.
 
-Repare em duas escolhas de projeto:
+Notice two design choices:
 
-**O `hint` importa mais que o `reason`.** A mensagem do stderr volta para o
-agente, então ela é a diferença entre ele tentar de novo do jeito certo ou
-gastar três turnos travado. Negativa sem caminho alternativo é o que faz o
-agente entrar em loop.
+**The `hint` matters more than the `reason`.** The stderr message goes back
+to the agent, so it's the difference between it retrying the right way or
+burning three turns stuck. A denial with no alternative path is what makes
+the agent loop.
 
-**O gate quebra aberto, não fechado.** Se a entrada não for JSON válido, ele
-libera e escreve no stderr. Gate que quebra fechado trava o time inteiro por bug
-próprio; gate que quebra aberto perde uma checagem e deixa rastro.
+**The gate fails open, not closed.** If the input isn't valid JSON, it
+allows and writes to stderr. A gate that fails closed locks up the whole
+team over its own bug; a gate that fails open loses one check and leaves a
+trace.
 
-## Limitações
+## Limitations
 
-- **Detecção é por padrão de texto e é evadível.** `R=rm; $R -rf /` passa. Há
-  dois testes marcados com `skip` documentando evasões conhecidas — a limitação
-  registrada em teste é mais honesta que a registrada em README.
-- **A allowlist é dívida.** Cada entrada é um buraco no gate. Aqui tem uma só,
-  e mesmo assim com motivo escrito.
-- **As regras são do domínio Acme Faturas.** As suas vão ser outras. O que
-  transfere é a estrutura — regra com id, motivo e orientação, decisão isolada
-  em função pura, e teste separando bloqueio, liberação e evasão.
-- **Falso positivo custa mais que falso negativo.** Um gate que atrapalha o
-  trabalho normal é desligado na segunda semana, e aí a proteção é zero. Por
-  isso o grupo de testes "libera" é maior que o de "bloqueia".
+- **Detection is pattern-based on text and is evadable.** `R=rm; $R -rf /`
+  passes. There are two tests marked with `skip` documenting known evasions
+  — a limitation recorded in a test is more honest than one recorded in a
+  README.
+- **The allowlist is debt.** Every entry is a hole in the gate. There's only
+  one here, and even so it has a written reason.
+- **The rules are for the Acme Invoices domain.** Yours will be different.
+  What transfers is the structure — a rule with an id, a reason, and a hint,
+  the decision isolated in a pure function, and tests separating blocking,
+  allowing, and evasion.
+- **A false positive costs more than a false negative.** A gate that gets in
+  the way of normal work gets disabled in week two, and then the protection
+  is zero. That's why the "allows" test group is bigger than the "blocks"
+  group.

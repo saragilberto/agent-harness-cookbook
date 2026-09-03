@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 /**
- * Comparação por delta.
+ * Delta comparison.
  *
- * O problema que isto resolve: qualquer base real já tem violação. Um scanner
- * que reporta o total absoluto devolve 340 achados antes e 341 depois, e
- * ninguém consegue julgar a mudança. O grader precisa responder uma pergunta
- * só — "esta mudança introduziu violação nova?" — e para isso o que importa é
- * a diferença entre duas varreduras, não o valor de nenhuma delas.
+ * The problem this solves: any real codebase already has violations. A
+ * scanner that reports the absolute total returns 340 findings before and
+ * 341 after, and nobody can judge the change. The grader needs to answer one
+ * question — "did this change introduce a new violation?" — and for that,
+ * what matters is the difference between two scans, not the value of either.
  *
- * O efeito colateral útil é que o ruído histórico se cancela: violação que já
- * existia aparece nos dois lados e some do delta.
+ * The useful side effect is that historical noise cancels out: a violation
+ * that already existed shows up on both sides and disappears from the delta.
  */
 import { scan, fingerprint } from "./scan.mjs";
 
@@ -33,7 +33,7 @@ export function compareDirectories(baselineDir, candidateDir) {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const [baselineDir, candidateDir] = process.argv.slice(2);
   if (!baselineDir || !candidateDir) {
-    console.error("uso: node delta.mjs <dir-antes> <dir-depois>");
+    console.error("usage: node delta.mjs <before-dir> <after-dir>");
     process.exit(1);
   }
   console.log(JSON.stringify(compareDirectories(baselineDir, candidateDir), null, 2));

@@ -1,16 +1,17 @@
 #!/usr/bin/env node
 /**
- * Runner de eval.
+ * Eval runner.
  *
- * Cada caso descreve uma mudança e o que o grader deve concluir sobre ela.
- * A saída é binária por caso: passou ou não. Nada de nota de 0 a 10, nada de
- * "parcialmente conforme" — a regra de isolamento não tem meio-termo, e um
- * grader que produz gradiente aqui só devolve a decisão para o humano.
+ * Each case describes a change and what the grader should conclude about
+ * it. The output is binary per case: pass or fail. No 0-to-10 score, no
+ * "partially compliant" — the isolation rule has no middle ground, and a
+ * grader that produces a gradient here just hands the decision back to the
+ * human.
  *
- * É esta a diferença para o LLM como juiz: o juiz é indispensável para
- * critério subjetivo ("a explicação está clara?") e é a ferramenta errada
- * para regra dura, onde ele introduz variância em cima de algo que era
- * determinístico.
+ * This is the difference from LLM-as-judge: the judge is indispensable for
+ * subjective criteria ("is the explanation clear?") and is the wrong tool
+ * for a hard rule, where it introduces variance on top of something that
+ * was deterministic.
  */
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
@@ -47,8 +48,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     const mark = result.passed ? "PASS" : "FAIL";
     console.log(`${mark}  ${result.id}`);
     if (!result.passed) {
-      console.log(`      esperado: [${result.expectedRules.join(", ") || "nenhuma"}]`);
-      console.log(`      obtido:   [${result.actualRules.join(", ") || "nenhuma"}]`);
+      console.log(`      expected: [${result.expectedRules.join(", ") || "none"}]`);
+      console.log(`      actual:   [${result.actualRules.join(", ") || "none"}]`);
       for (const finding of result.introduced) {
         console.log(`      ${finding.file}:${finding.line}  ${finding.evidence}`);
       }
@@ -56,6 +57,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   }
 
   const failed = results.filter((r) => !r.passed).length;
-  console.log(`\n${results.length - failed}/${results.length} casos passaram`);
+  console.log(`\n${results.length - failed}/${results.length} cases passed`);
   process.exit(failed > 0 ? 1 : 0);
 }

@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * Scanner de violação arquitetural.
+ * Architectural violation scanner.
  *
- * Regras do domínio Acme Faturas: plataforma multi-tenant com um schema
- * Postgres por tenant. As quatro regras abaixo são as que, se violadas,
- * vazam dado de um tenant para outro — o tipo de falha que não aparece em
- * teste de unidade porque o teste roda com um tenant só.
+ * Rules for the Acme Invoices domain: a multi-tenant platform with one
+ * Postgres schema per tenant. The four rules below are the ones that, when
+ * violated, leak data from one tenant to another — the kind of failure that
+ * doesn't show up in a unit test because the test runs with a single tenant.
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
@@ -14,22 +14,22 @@ export const RULES = [
   {
     id: "A01",
     pattern: /class\s+(\w+)\s+extends\s+Model\b/,
-    message: "model estende Model em vez de TenantModel; vai para o schema errado",
+    message: "model extends Model instead of TenantModel; goes to the wrong schema",
   },
   {
     id: "A02",
     pattern: /DB::connection\(\s*['"](default|pgsql)['"]\s*\)/,
-    message: "conexão fixa ignora o schema do tenant",
+    message: "fixed connection ignores the tenant's schema",
   },
   {
     id: "A03",
     pattern: /SET\s+search_path/i,
-    message: "search_path cru sem restauração corrompe as queries seguintes",
+    message: "raw search_path without restoration corrupts subsequent queries",
   },
   {
     id: "A04",
     pattern: /Cache::(put|get|remember)\(\s*['"](?!tenant:)/,
-    message: "chave de cache sem prefixo de tenant colide entre tenants",
+    message: "cache key without a tenant prefix collides across tenants",
   },
 ];
 
@@ -64,10 +64,10 @@ export function scan(root, rules = RULES) {
           findings.push({
             ruleId: rule.id,
             file: relative(root, file),
-            // `evidence` é o texto normalizado da linha, e é ele — não o
-            // número da linha — que compõe a identidade do achado.
-            // Número de linha muda quando alguém adiciona um import no topo,
-            // e isso geraria delta falso a cada commit.
+            // `evidence` is the normalized text of the line, and it — not
+            // the line number — is what makes up the finding's identity.
+            // The line number shifts whenever someone adds an import at
+            // the top, which would generate a false delta on every commit.
             evidence: text.trim(),
             line: index + 1,
           });
@@ -79,7 +79,7 @@ export function scan(root, rules = RULES) {
   return findings;
 }
 
-/** Identidade estável de um achado, usada para comparar duas varreduras. */
+/** Stable identity of a finding, used to compare two scans. */
 export function fingerprint(finding) {
   return `${finding.ruleId}::${finding.file}::${finding.evidence}`;
 }
@@ -87,7 +87,7 @@ export function fingerprint(finding) {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const target = process.argv[2];
   if (!target) {
-    console.error("uso: node scan.mjs <diretorio>");
+    console.error("usage: node scan.mjs <directory>");
     process.exit(1);
   }
   console.log(JSON.stringify(scan(target), null, 2));

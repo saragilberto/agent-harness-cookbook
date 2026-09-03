@@ -1,71 +1,75 @@
-# Grader determinístico versus LLM como juiz
+# Deterministic grader versus LLM-as-judge
 
-Artigo: <url>
+Article: <url>
 
-## O problema
+## The problem
 
-Toda base real já tem violação. Um scanner que reporta total absoluto devolve
-340 achados antes da mudança e 341 depois, e ninguém consegue julgar nada com
-isso. Pior: se você usa um LLM como juiz para decidir se a mudança respeitou a
-regra arquitetural, ele acerta na maioria das vezes e erra em algumas, e você
-acabou de colocar variância em cima de uma regra que era binária.
+Every real codebase already has violations. A scanner that reports the
+absolute total returns 340 findings before the change and 341 after, and
+nobody can judge anything from that. Worse: if you use an LLM as a judge to
+decide whether the change respected the architectural rule, it's right most
+of the time and wrong some of the time, and you've just added variance on
+top of a rule that was binary.
 
-## Como rodar
+## How to run
 
 ```bash
 cd exemplos/grader-deterministico
-node run-eval.mjs     # roda os casos e devolve nota
-node --test           # testa o próprio grader
+node run-eval.mjs     # runs the cases and returns a score
+node --test           # tests the grader itself
 ```
 
-Inspecionando os passos separados:
+Inspecting the steps separately:
 
 ```bash
 node scan.mjs fixtures/baseline
 node delta.mjs fixtures/baseline fixtures/candidate-violation
 ```
 
-## O que olhar primeiro
+## What to look at first
 
-`scan.mjs`, função `fingerprint()` — três linhas que decidem se o grader é
-utilizável. A identidade de um achado é `regra + arquivo + texto da linha`, e
-não inclui o número da linha. Se incluísse, adicionar um import no topo do
-arquivo geraria delta falso em tudo abaixo, e o grader viraria ruído no primeiro
-commit real.
+`scan.mjs`, the `fingerprint()` function — three lines that decide whether
+the grader is usable. A finding's identity is `rule + file + line text`, and
+it doesn't include the line number. If it did, adding an import at the top
+of a file would generate a false delta on everything below it, and the
+grader would turn into noise on the first real commit.
 
-Depois, `delta.mjs`. O grader não pergunta "quantas violações existem?", pergunta
-"esta mudança introduziu violação nova?". A subtração faz o passivo histórico se
-cancelar sozinho, sem precisar de arquivo de exceção nem de baseline congelado
-que alguém esquece de atualizar.
+Then `delta.mjs`. The grader doesn't ask "how many violations exist?", it
+asks "did this change introduce a new violation?". The subtraction makes
+the historical backlog cancel itself out, with no need for an exception file
+or a frozen baseline someone forgets to update.
 
-O caso `R03` em `cases.json` é um canário: compara o baseline com ele mesmo e
-espera zero. Se ele falhar, a impressão digital está instável e todos os outros
-casos viraram ruído. Vale ter um equivalente disso em qualquer suíte de eval.
+The `R03` case in `cases.json` is a canary: it compares the baseline against
+itself and expects zero. If it fails, the fingerprint is unstable and every
+other case has turned into noise. It's worth having an equivalent of this in
+any eval suite.
 
-## Onde entra o LLM como juiz
+## Where LLM-as-judge fits in
 
-Não aqui. Isolamento de tenant é regra dura, tem resposta certa, e grader
-determinístico responde igual toda vez, de graça, em milissegundos.
+Not here. Tenant isolation is a hard rule, it has a correct answer, and a
+deterministic grader answers the same way every time, for free, in
+milliseconds.
 
-O juiz é indispensável em outro lugar: critério subjetivo, do tipo "a mensagem
-de erro explica o que fazer?" ou "o PR descreve a mudança?". Nesses casos não
-existe regex possível e a variância do juiz é aceitável porque o gabarito humano
-também varia.
+The judge is indispensable somewhere else: subjective criteria, like "does
+the error message explain what to do?" or "does the PR describe the
+change?". In those cases no regex is possible, and the judge's variance is
+acceptable because the human answer key also varies.
 
-A regra prática: se dois revisores experientes sempre concordariam, é grader
-determinístico. Se eles poderiam divergir, é juiz.
+The practical rule: if two experienced reviewers would always agree, use a
+deterministic grader. If they could disagree, use a judge.
 
-## Limitações
+## Limitations
 
-- **Regex não entende sintaxe.** `class Invoice extends Model` dentro de um
-  comentário ou de uma string conta como violação. Para regra que exige precisão,
-  o passo seguinte é AST em vez de linha.
-- **Só detecta o que já foi nomeado.** Se o padrão não estiver na lista, o
-  scanner devolve zero achados — e zero achado por ausência de padrão aplicável
-  é indistinguível de zero achado por conformidade. É o falso zero, e é a
-  principal armadilha desta abordagem.
-- **O delta não vê renomeação.** Mover um arquivo aparece como uma violação
-  resolvida mais uma introduzida.
-- **Quatro regras é ilustração, não cobertura.** Uma suíte real de isolamento
-  multi-tenant tem regra para job, seeder, command, migration e chave de cache,
-  e cada uma nasce de um incidente.
+- **Regex doesn't understand syntax.** `class Invoice extends Model` inside
+  a comment or a string counts as a violation. For a rule that requires
+  precision, the next step is an AST instead of a line.
+- **It only detects what's already been named.** If the pattern isn't in the
+  list, the scanner returns zero findings — and zero findings from an
+  inapplicable pattern is indistinguishable from zero findings from
+  compliance. That's the false zero, and it's the main trap of this
+  approach.
+- **The delta doesn't see renames.** Moving a file shows up as one resolved
+  violation plus one introduced.
+- **Four rules is an illustration, not coverage.** A real multi-tenant
+  isolation suite has rules for jobs, seeders, commands, migrations, and
+  cache keys, and each one is born from an incident.
