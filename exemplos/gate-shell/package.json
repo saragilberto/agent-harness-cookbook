@@ -1,0 +1,8 @@
+{
+  "name": "gate-shell",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}

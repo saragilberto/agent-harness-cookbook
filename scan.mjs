@@ -9,6 +9,7 @@
  */
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
+import { pathToFileURL } from "node:url";
 
 export const RULES = [
   {
@@ -84,7 +85,7 @@ export function fingerprint(finding) {
   return `${finding.ruleId}::${finding.file}::${finding.evidence}`;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const target = process.argv[2];
   if (!target) {
     console.error("usage: node scan.mjs <directory>");

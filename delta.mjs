@@ -11,6 +11,7 @@
  * The useful side effect is that historical noise cancels out: a violation
  * that already existed shows up on both sides and disappears from the delta.
  */
+import { pathToFileURL } from "node:url";
 import { scan, fingerprint } from "./scan.mjs";
 
 /**
@@ -30,7 +31,7 @@ export function compareDirectories(baselineDir, candidateDir) {
   return delta(scan(baselineDir), scan(candidateDir));
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const [baselineDir, candidateDir] = process.argv.slice(2);
   if (!baselineDir || !candidateDir) {
     console.error("usage: node delta.mjs <before-dir> <after-dir>");

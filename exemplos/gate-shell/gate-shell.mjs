@@ -12,6 +12,7 @@
  * The decision logic is isolated in evaluate() on purpose: that's what lets
  * the gate be tested without simulating the agent's runtime.
  */
+import { pathToFileURL } from "node:url";
 
 /**
  * Each rule is a thesis about what should never happen without a human in
@@ -145,6 +146,6 @@ async function main() {
   process.exit(0);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main();
 }

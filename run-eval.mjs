@@ -15,7 +15,7 @@
  */
 import { readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { compareDirectories } from "./delta.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -40,7 +40,7 @@ export function runAll(cases, root = here) {
   return cases.map((testCase) => runCase(testCase, root));
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const cases = JSON.parse(readFileSync(join(here, "cases.json"), "utf8"));
   const results = runAll(cases);
 
