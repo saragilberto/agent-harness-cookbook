@@ -24,6 +24,7 @@ node --test
 |---|---|---|
 | [`metricas-revisao`](exemplos/metricas-revisao) | The bottleneck moved | PR size and time-to-merge inferred from a git log |
 | [`gate-shell`](exemplos/gate-shell) | PreToolUse hook as a shell gate | Blocking destructive commands before execution, with its own test suite |
+| [`regra-com-mecanismo`](exemplos/regra-com-mecanismo) | A rule in CLAUDE.md is not a rule | The same rule as text versus as a hook, with a test proving only one blocks |
 | [`grader-deterministico`](exemplos/grader-deterministico) | Deterministic grader versus LLM-as-judge | Architectural violation scanner with delta comparison |
 
 ## Example domain

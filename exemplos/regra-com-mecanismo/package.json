@@ -1,0 +1,8 @@
+{
+  "name": "regra-com-mecanismo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}
