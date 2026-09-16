@@ -1,0 +1,17 @@
+c1|p0|1700000000
+10	2	app/Services/TaxRuleService.php
+
+m1|c1 p0|1700001800
+0	0	app/Services/TaxRuleService.php
+
+c2|m1|1700005400
+200	50	app/Models/Invoice.php
+
+c3|c2|1700009000
+300	100	app/Models/Invoice.php
+
+m2|c3 m1|1700149400
+0	0	app/Models/Invoice.php
+
+c4|m2|1700153000
+5	1	README.md

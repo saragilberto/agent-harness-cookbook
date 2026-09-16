@@ -22,6 +22,7 @@ node --test
 
 | Directory | Article | What it demonstrates |
 |---|---|---|
+| [`metricas-revisao`](exemplos/metricas-revisao) | The bottleneck moved | PR size and time-to-merge inferred from a git log |
 | [`gate-shell`](exemplos/gate-shell) | PreToolUse hook as a shell gate | Blocking destructive commands before execution, with its own test suite |
 | [`grader-deterministico`](exemplos/grader-deterministico) | Deterministic grader versus LLM-as-judge | Architectural violation scanner with delta comparison |
 
