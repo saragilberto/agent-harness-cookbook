@@ -27,6 +27,7 @@ node --test
 | [`regra-com-mecanismo`](exemplos/regra-com-mecanismo) | A rule in CLAUDE.md is not a rule | The same rule as text versus as a hook, with a test proving only one blocks |
 | [`grader-deterministico`](exemplos/grader-deterministico) | Deterministic grader versus LLM-as-judge | Architectural violation scanner with delta comparison |
 | [`eval-multiturno`](exemplos/eval-multiturno) | An eval is not a test | A violation that only exists across turns, invisible to a single-turn check |
+| [`onboarding-junior`](exemplos/onboarding-junior) | Twenty devs, most of them junior | A hook that requires a written justification before a sensitive write lands |
 
 ## Example domain
 
