@@ -1,0 +1,38 @@
+-- Acme Invoices, legacy Firebird schema. Twenty years old, no comments,
+-- no declared foreign keys — the naming convention is the only thing
+-- that still says how these tables relate to each other.
+
+CREATE TABLE CUSTOMERS (
+  CUST_ID INTEGER NOT NULL,
+  CUST_NM VARCHAR(60),
+  TEN_ID INTEGER,
+  FLG_ACTIVE CHAR(1) DEFAULT 'Y',
+  PRIMARY KEY (CUST_ID)
+);
+
+CREATE TABLE INVOICES (
+  INV_ID INTEGER NOT NULL,
+  CUST_ID INTEGER,
+  TOT_AMT NUMERIC(15,2),
+  DISC_PCT NUMERIC(5,2),
+  STAT CHAR(1),
+  ISSUE_DT DATE,
+  PRIMARY KEY (INV_ID)
+);
+
+CREATE TABLE INVOICE_ITEMS (
+  ITM_ID INTEGER NOT NULL,
+  INV_ID INTEGER,
+  PROD_CD VARCHAR(20),
+  QTY INTEGER,
+  UNIT_PRC NUMERIC(15,2),
+  PRIMARY KEY (ITM_ID)
+);
+
+CREATE TABLE TAX_RULES (
+  RULE_ID INTEGER NOT NULL,
+  TEN_ID INTEGER,
+  PCT NUMERIC(5,2),
+  FOREIGN KEY (TEN_ID) REFERENCES TENANTS (TEN_ID),
+  PRIMARY KEY (RULE_ID)
+);

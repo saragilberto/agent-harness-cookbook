@@ -29,6 +29,7 @@ node --test
 | [`eval-multiturno`](exemplos/eval-multiturno) | An eval is not a test | A violation that only exists across turns, invisible to a single-turn check |
 | [`onboarding-junior`](exemplos/onboarding-junior) | Twenty devs, most of them junior | A hook that requires a written justification before a sensitive write lands |
 | [`auditoria-harness`](exemplos/auditoria-harness) | Six common gaps | Scans a `.claude/` directory and lists which of six known gaps are present |
+| [`inventario-legado`](exemplos/inventario-legado) | Auditing a twenty-year-old Firebird database | Read-only inventory heuristics plus a hook that guarantees the connection can't write |
 
 ## Example domain
 
