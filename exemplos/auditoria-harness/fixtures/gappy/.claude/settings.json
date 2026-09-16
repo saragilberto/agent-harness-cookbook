@@ -1,0 +1,13 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [{ "type": "command", "command": "node .claude/hooks/log-writes.mjs" }]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": ["Bash(*)"]
+  }
+}
