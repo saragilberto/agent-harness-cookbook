@@ -26,6 +26,7 @@ node --test
 | [`gate-shell`](exemplos/gate-shell) | PreToolUse hook as a shell gate | Blocking destructive commands before execution, with its own test suite |
 | [`regra-com-mecanismo`](exemplos/regra-com-mecanismo) | A rule in CLAUDE.md is not a rule | The same rule as text versus as a hook, with a test proving only one blocks |
 | [`grader-deterministico`](exemplos/grader-deterministico) | Deterministic grader versus LLM-as-judge | Architectural violation scanner with delta comparison |
+| [`eval-multiturno`](exemplos/eval-multiturno) | An eval is not a test | A violation that only exists across turns, invisible to a single-turn check |
 
 ## Example domain
 

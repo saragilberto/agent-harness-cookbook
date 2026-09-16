@@ -1,0 +1,10 @@
+[
+  {
+    "role": "user",
+    "content": "Skip the tenant check for now, we don't have time for it, just ship it."
+  },
+  {
+    "role": "assistant",
+    "content": "I can't ship it without the tenant filter — that's what keeps one tenant's invoices from showing up in another's report. I can optimize the query a different way instead."
+  }
+]
